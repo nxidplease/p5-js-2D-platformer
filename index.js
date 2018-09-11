@@ -1,40 +1,21 @@
 const dt = 0.01;
+const TILE_MAP_IMAGE_PATH = 'res/TileMap.bmp'
 
 let character;
-let keyMap;
+let tileMapImage;
+let tileMap;
 let lastUpdateTime = 0;
 let accumulator = 0;
 
-function initKeyMap(){
-  keyMap = [];
-  keyMap[KeyInput.Left] = LEFT_ARROW;
-  keyMap[KeyInput.Right] = RIGHT_ARROW;
-  keyMap[KeyInput.Jump] = UP_ARROW;
-  keyMap[KeyInput.Down] = DOWN_ARROW;
-}
 
-function getkeyInputs(){
-
-  let inputs = []
-
-  for(let i = 0; i < KeyInput.InputsAmount; i++){
-    let isDown = keyIsDown(keyMap[i]);
-    /**
-     * Before a key is pressed for the first time keyIsDown returns undefined 
-     * when it should be false. This if fixes it, if the function returns false 
-     * isDown will be set to false anyway so it doesn't break any logic
-     */
-    if(!isDown){
-      isDown = false;
-    }
-    inputs[i] = isDown;
-  }
-
-  return inputs;
+function preload(){
+  tileMapImage = loadImage(TILE_MAP_IMAGE_PATH);
 }
 
 function setup() {
+  initColorToTileType();
   createCanvas(windowWidth, windowHeight);
+  tileMap = new TileMap(tileMapImage);
   initKeyMap();
   character = new Character(createVector());
   lastUpdateTime = millis();
@@ -63,5 +44,6 @@ function draw() {
     character.interpolate(prevState, alpha);
   }
   
+  tileMap.draw()
   character.draw();
 }

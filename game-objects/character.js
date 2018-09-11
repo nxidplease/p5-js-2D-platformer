@@ -1,8 +1,8 @@
 const GRAVITY = 7.5;
 const MAX_FALLING_SPEED = 5;
-const MIN_JUMP_SPEED = 25;
+const MIN_JUMP_SPEED = 20;
 const WALK_SPEED = 35;
-const JUMP_SPEED = 50;
+const JUMP_SPEED = 35;
 const CHARACTER_HEIGHT = 40;
 const CHARACTER_WIDTH = 10;
 
