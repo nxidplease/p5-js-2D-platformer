@@ -1,3 +1,5 @@
+const MAX_COLLISION_ITERATIONS = 3;
+
 class MovingObject{
 
     constructor(pos, velocity, size){
@@ -6,6 +8,7 @@ class MovingObject{
 
         this.boundingBox = new AxisAlignedBoundingBox(pos, size.div(2));
         this.boundingBoxOffset = createVector();
+        this.collisionPoints = new CollisonPoints(this.boundingBox);
 
         this.pushedLeftWall = this.pushesLeftWall = this.position.x < 0;
         this.pushedRightWall = this.pushesRightWall = (this.position.x + this.boundingBox.halfSize.x * 2) > width;
@@ -24,22 +27,141 @@ class MovingObject{
         this.wasOnGround = this.onGround;
         this.pushedRightWall = this.pushesRightWall;
         this.pushedLeftWall = this.pushesLeftWall;
+        let originalVelocity = p5.Vector.mult(this.velocity, deltaTime);
 
-        this.position.add(p5.Vector.mult(this.velocity, deltaTime))
+        let actualVel = this.collisionDetection(originalVelocity);
+
+        this.position.add(actualVel)
 
         let maxObjectTopPos = height - this.boundingBox.halfSize.y * 2;
-
+        
         if(this.position.y >= maxObjectTopPos){
             this.position.y = maxObjectTopPos;
             this.onGround = true;
         } else {
-            this.onGround = false;
-        }
+            this.onGround = this.onPlatform;
+        }    
 
         this.pushesLeftWall = this.position.x <= 0;
         this.pushesRightWall = (this.position.x + this.boundingBox.halfSize.x * 2) >= width;
 
         this.boundingBox.center = p5.Vector.add(this.position,this.boundingBoxOffset);
+        this.collisionPoints.recalculate(this.boundingBox);
+    }
+
+    collisionDetection(originalVelocity){
+        let collisionX, collisionBottom, collisionTop = true;
+
+        for(let i = 0; i < MAX_COLLISION_ITERATIONS && (collisionX || collisionBottom || collisionTop); i++){
+            collisionX = collisionBottom = collisionTop = false;
+            originalVelocity = this.tilesCollision(collisionX, collisionBottom, collisionTop, originalVelocity);
+        }
+
+        return originalVelocity;
+    }
+
+    tilesCollision(collisionX, collisionBottom, collisionTop, originalVelocity){
+        let projectedVel = originalVelocity.copy();
+        for(let i = 0; i < tileMap.tileRows && !collisionX && !collisionBottom && !collisionTop; i++){
+            for(let j = 0; j < tileMap.tileCols && !collisionX && !collisionBottom && !collisionTop; j++){
+                let currTile = tileMap.tiles[i][j];
+                if(currTile.tileType == TileType.Blocked){
+                    projectedVel = this.resolvePenetration(projectedVel, currTile);
+
+                    collisionTop = (projectedVel.y > originalVelocity.y) && (originalVelocity.y < 0);
+                    collisionBottom = (projectedVel.y < originalVelocity.y) && (originalVelocity.y > 0);
+                    collisionX = Math.abs(projectedVel.x - originalVelocity.x) > 0.01;
+
+                    if(collisionBottom){
+                        this.onPlatform = true;
+                    }
+
+                    currTile.colided = (collisionBottom || collisionTop || collisionX);
+
+                    if(collisionX && collisionTop && projectedVel.y < 0){
+                        this.velocity.y = projectedVel.y = 0;
+                    }
+                }
+            }
+        }
+
+        if(collisionBottom || collisionTop){
+            //this.position.y += projectedVel.y;
+            this.velocity.y = 0;
+        }
+
+        if(this.onPlatform){
+            // If on platform and trying to fall, then don't
+            if(collisionBottom && (projectedVel.y > 0) && (projectedVel.y <= 1)){
+                this.projectedVel.y = 0;
+            } else if(projectedVel.y > 1){
+                this.onPlatform = false;
+            }
+
+        }
+
+
+        if(collisionX){
+            //this.position.x += projectedVel.x;
+            this.velocity.x = 0;
+        }
+
+        return projectedVel;
+    }
+
+    resolvePenetration(projectedVel, tile){
+        projectedVel = this.resolvePenetrationTop(projectedVel, tile);
+        projectedVel = this.resolvePenetrationBottom(projectedVel, tile);
+        projectedVel = this.resolvePenetrationRight(projectedVel, tile);
+        return this.resolvePenetrationLeft(projectedVel, tile);
+    }
+
+    resolvePenetrationTop(originalVelocity, tile){
+        let velCpy = originalVelocity.copy();
+        //velCpy.x = 0;
+        let collisionPoints = this.collisionPoints.points[Direction.Up];
+        
+        while(tile.containsPoint(p5.Vector.add(collisionPoints[0], velCpy)) || 
+              tile.containsPoint(p5.Vector.add(collisionPoints[1], velCpy))){
+                  velCpy.y++;
+              }
+        return velCpy;
+    }
+
+    resolvePenetrationBottom(originalVelocity, tile){
+        let velCpy = originalVelocity.copy();
+        //velCpy.x = 0;
+        let collisionPoints = this.collisionPoints.points[Direction.Down];
+        
+        while(tile.containsPoint(p5.Vector.add(collisionPoints[0], velCpy)) || 
+              tile.containsPoint(p5.Vector.add(collisionPoints[1], velCpy))){
+                  velCpy.y--;
+              }
+        return velCpy;
+    }
+
+    resolvePenetrationRight(originalVelocity, tile){
+        let velCpy = originalVelocity.copy();
+        //velCpy.y = 0;
+        let collisionPoints = this.collisionPoints.points[Direction.Right];
+        
+        while(tile.containsPoint(p5.Vector.add(collisionPoints[0], velCpy)) || 
+              tile.containsPoint(p5.Vector.add(collisionPoints[1], velCpy))){
+                  velCpy.x--;
+              }
+        return velCpy;
+    }
+
+    resolvePenetrationLeft(originalVelocity, tile){
+        let velCpy = originalVelocity.copy();
+        //velCpy.y = 0;
+        let collisionPoints = this.collisionPoints.points[Direction.Left];
+        
+        while(tile.containsPoint(p5.Vector.add(collisionPoints[0], velCpy)) || 
+              tile.containsPoint(p5.Vector.add(collisionPoints[1], velCpy))){
+                  velCpy.x++;
+              }
+        return velCpy;
     }
 
     draw(){

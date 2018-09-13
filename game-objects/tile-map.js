@@ -31,7 +31,8 @@ class TileMap {
             this.tiles[i] = [];
             for(let j = 0; j < this.tileCols; j++){
                 let clrStr = color(img.get(j, i)).toString();
-                this.tiles[i][j] = colorToTileType.get(clrStr);
+                let tileType = colorToTileType.get(clrStr);
+                this.tiles[i][j] = Tile.createTile(j, i, tileType);
             }
         }
     }
@@ -41,10 +42,14 @@ class TileMap {
         stroke(color('lime'))
         for(let i = 0; i < this.tileRows; i++){
             for(let j = 0; j < this.tileCols; j++){
-                if(this.tiles[i][j] == TileType.Blocked){
+                if(this.tiles[i][j].tileType == TileType.Blocked){
                     let x = j * TILE_SIZE;
                     let y = i * TILE_SIZE;
-                    fill(0);
+                    if(this.tiles[i][j].colided){
+                        fill(150, 0, 0);
+                    } else {
+                        fill(0);
+                    }
                     rect(x, y, TILE_SIZE, TILE_SIZE);
                 }
             }

@@ -1,8 +1,8 @@
 const GRAVITY = 7.5;
 const MAX_FALLING_SPEED = 5;
-const MIN_JUMP_SPEED = 20;
+const MIN_JUMP_SPEED = 35;
 const WALK_SPEED = 35;
-const JUMP_SPEED = 35;
+const JUMP_SPEED = 50;
 const CHARACTER_HEIGHT = 40;
 const CHARACTER_WIDTH = 10;
 
@@ -80,8 +80,8 @@ class Character extends MovingObject{
                     this.state = CharacterState.Walk;
                     break;
                 } else if(this.isPressed(KeyInput.Jump)){
-                    this.velocity.y = -this.jumpSpeed;
-                    this.state = CharacterState.Jump;
+                    console.log("stand->jump");
+                    this.jump();
                     break;
                 }
                 
@@ -109,8 +109,7 @@ class Character extends MovingObject{
                 }
 
                 if(this.isPressed(KeyInput.Jump)){
-                    this.velocity.y = -this.jumpSpeed;
-                    this.state = CharacterState.Jump;
+                    this.jump();
                     break;
                 } else if(!this.onGround){
                     this.state = CharacterState.Jump;
@@ -148,9 +147,11 @@ class Character extends MovingObject{
 
                 if(this.onGround){
                     if(this.inputs[KeyInput.Right] == this.inputs[KeyInput.Left]){
+                        console.log("jump->stand");
                         this.state = CharacterState.Stand;
                         this.velocity = createVector();
                     } else {
+                        console.log("jump->walk");
                         this.state = CharacterState.Walk;
                         this.velocity.y = 0;
                     }
@@ -167,6 +168,12 @@ class Character extends MovingObject{
         super.update(deltaTime);
 
         this.updateInputs();
+    }
+
+    jump(){
+        this.velocity.y = -this.jumpSpeed;
+        this.onPlatform = false;
+        this.state = CharacterState.Jump;
     }
 
     updateInputs(){
