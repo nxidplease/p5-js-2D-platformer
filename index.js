@@ -28,11 +28,18 @@ function setup() {
 
 function mousePressed(){
   character.position = createVector(mouseX, mouseY).sub(camera.position);
+  character.velocity = createVector();
 }
 
 function draw() {
   background(175);
-  let keyInpts = getkeyInputs();
+  translate(camera.position.x, camera.position.y);
+  tileMap.draw()
+  character.draw();
+  physics(getkeyInputs());
+}
+
+function physics(keyInpts){
   let now = millis();
   let frameTime = (now - lastUpdateTime) / 1000;
   
@@ -54,10 +61,4 @@ function draw() {
     let alpha = accumulator / dt;
     character.interpolate(prevState, alpha);
   }
-
-
-  translate(camera.position.x , camera.position.y);
-  
-  tileMap.draw()
-  character.draw();
 }

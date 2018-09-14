@@ -5,6 +5,7 @@ const WALK_SPEED = 35;
 const JUMP_SPEED = 50;
 const CHARACTER_HEIGHT = 40;
 const CHARACTER_WIDTH = 10;
+const PLATFORM_FALL_JUMP_TIME_TOLORANCE = 0.15;
 
 const KeyInput = {
     Left : 0,
@@ -120,6 +121,13 @@ class Character extends MovingObject{
             }
             
             case CharacterState.Jump:{
+
+                let now = millis();
+
+                if(((now - this.lastOnPlatform) / 1000 < PLATFORM_FALL_JUMP_TIME_TOLORANCE) && this.isPressed(KeyInput.Jump)){
+                    this.jump();
+                    break;
+                }
 
                 if(this.velocity.y > 0){
                     this.velocity.y = max(this.velocity.y, MAX_FALLING_SPEED);

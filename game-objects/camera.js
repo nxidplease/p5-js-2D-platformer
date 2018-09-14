@@ -22,7 +22,7 @@ class Camera {
 
     update(deltaTime){
         this.position.add(p5.Vector.mult(this.velocity, deltaTime));
-        //translate(this.position);
+        //translate(this.position.x, this.position.y);
     }
     
 }

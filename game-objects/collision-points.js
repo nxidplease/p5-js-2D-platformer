@@ -19,22 +19,25 @@ class CollisonPoints {
         let right = center.x + halfSize.x;
         let top = center.y - halfSize.y;
         let bottom = center.y + halfSize.y;
+        
+        let topLeft = createVector(left * 0.75 + right * 0.25, top);
+        let topRight = createVector(left * 0.25 + right * 0.75, top);
 
-        this._points = [];
+        let leftTop = createVector(left, top * 0.75 + bottom * 0.25);
+        let leftBottom = createVector(left, top * 0.25 + bottom * 0.75);
 
-        this._points[Direction.Up] = [];
-        this._points[Direction.Up].push(createVector(left * 0.75 + right * 0.25, top), 
-                      createVector(left * 0.25 + right * 0.75, top));
-        this._points[Direction.Left] = [];
-        this._points[Direction.Left].push(createVector(left, top * 0.75 + bottom * 0.25),
-                       createVector(left, top * 0.25 + bottom * 0.75));
-        this._points[Direction.Down] = [];
-        this._points[Direction.Down].push(createVector(left * 0.75 + right * 0.25, bottom), 
-                         createVector(left * 0.25 + right * 0.75, bottom));
+        let bottomLeft = createVector(left * 0.75 + right * 0.25, bottom);
+        let bottomRight = createVector(left * 0.25 + right * 0.75, bottom);
 
-        this._points[Direction.Right] = [];
-        this._points[Direction.Right].push(createVector(right, top * 0.75 + bottom * 0.25),
-                    createVector(right, top * 0.25 + bottom * 0.75));
+        let rightTop = createVector(right, top * 0.75 + bottom * 0.25);
+        let rightBottom = createVector(right, top * 0.25 + bottom * 0.75);
+
+        this._points = new Array(4);
+
+        this._points[Direction.Up] = new Array(topLeft, topRight);
+        this._points[Direction.Left] = new Array(leftTop, leftBottom);
+        this._points[Direction.Down] = new Array(bottomLeft, bottomRight);
+        this._points[Direction.Right] = new Array(rightTop, rightBottom);
     }
     
     get points(){

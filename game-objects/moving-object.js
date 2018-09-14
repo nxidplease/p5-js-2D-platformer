@@ -99,6 +99,7 @@ class MovingObject{
                 projectedVel.y = 0;
             } else {
                 this.onPlatform = false;
+                this.lastOnPlatform = millis();
             }
 
         }
