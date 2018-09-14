@@ -3,6 +3,8 @@ const RECT_SIZE = 80;
 const TILE_MAP_IMAGE_PATH = 'res/TileMap.bmp'
 
 let character;
+let camera;
+let screenCenter;
 let tileMapImage;
 let tileMap;
 let lastUpdateTime = 0;
@@ -20,6 +22,12 @@ function setup() {
   initKeyMap();
   character = new Character(createVector());
   lastUpdateTime = millis();
+  camera = new Camera();
+  screenCenter = createVector(width /2, height /2);
+}
+
+function mousePressed(){
+  character.position = createVector(mouseX, mouseY).sub(camera.position);
 }
 
 function draw() {
@@ -37,6 +45,8 @@ function draw() {
   while(accumulator >= dt){
     prevState = character.copy();
     character.timeStep(keyInpts, dt);
+    camera.arriveAt(p5.Vector.sub(screenCenter, character.position));
+    camera.update(dt);
     accumulator -= dt;
   }
   
@@ -45,13 +55,9 @@ function draw() {
     character.interpolate(prevState, alpha);
   }
 
-  //translate(width /2 - character.position.x, height /2 - character.position.y);
+
+  translate(camera.position.x , camera.position.y);
   
   tileMap.draw()
   character.draw();
-  push();
-  strokeWeight(4);
-  stroke(175, 0, 0);
-  point(320, 80)
-  pop();
 }
