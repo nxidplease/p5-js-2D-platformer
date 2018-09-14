@@ -28,6 +28,7 @@ class MovingObject{
         this.pushedRightWall = this.pushesRightWall;
         this.pushedLeftWall = this.pushesLeftWall;
         let originalVelocity = p5.Vector.mult(this.velocity, deltaTime);
+        this.gravityVel = GRAVITY * deltaTime;
 
         let actualVel = this.collisionDetection(originalVelocity);
 
@@ -85,16 +86,18 @@ class MovingObject{
             }
         }
 
-        if(collisionBottom || collisionTop){
-            //this.position.y += projectedVel.y;
+        if(collisionTop){
             this.velocity.y = 0;
         }
 
         if(this.onPlatform){
-            // If on platform and trying to fall, then don't
-            if(collisionBottom && (projectedVel.y > 0) && (projectedVel.y <= 1)){
-                this.projectedVel.y = 0;
-            } else if(projectedVel.y > 1){
+            // If on platform don't move down
+            // but keep gravity to cause constant collision
+            // to prevent character from going to jump state
+            if(collisionBottom){
+                this.velocity.y = this.gravityVel;
+                projectedVel.y = 0;
+            } else {
                 this.onPlatform = false;
             }
 
@@ -102,7 +105,6 @@ class MovingObject{
 
 
         if(collisionX){
-            //this.position.x += projectedVel.x;
             this.velocity.x = 0;
         }
 
@@ -118,7 +120,6 @@ class MovingObject{
 
     resolvePenetrationTop(originalVelocity, tile){
         let velCpy = originalVelocity.copy();
-        //velCpy.x = 0;
         let collisionPoints = this.collisionPoints.points[Direction.Up];
         
         while(tile.containsPoint(p5.Vector.add(collisionPoints[0], velCpy)) || 
@@ -130,19 +131,18 @@ class MovingObject{
 
     resolvePenetrationBottom(originalVelocity, tile){
         let velCpy = originalVelocity.copy();
-        //velCpy.x = 0;
         let collisionPoints = this.collisionPoints.points[Direction.Down];
         
         while(tile.containsPoint(p5.Vector.add(collisionPoints[0], velCpy)) || 
               tile.containsPoint(p5.Vector.add(collisionPoints[1], velCpy))){
-                  velCpy.y--;
+                  velCpy.y --;
               }
+
         return velCpy;
     }
 
     resolvePenetrationRight(originalVelocity, tile){
         let velCpy = originalVelocity.copy();
-        //velCpy.y = 0;
         let collisionPoints = this.collisionPoints.points[Direction.Right];
         
         while(tile.containsPoint(p5.Vector.add(collisionPoints[0], velCpy)) || 
@@ -154,7 +154,6 @@ class MovingObject{
 
     resolvePenetrationLeft(originalVelocity, tile){
         let velCpy = originalVelocity.copy();
-        //velCpy.y = 0;
         let collisionPoints = this.collisionPoints.points[Direction.Left];
         
         while(tile.containsPoint(p5.Vector.add(collisionPoints[0], velCpy)) || 

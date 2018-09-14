@@ -67,9 +67,11 @@ class Character extends MovingObject{
     }
 
     update(deltaTime) {
+        this.velocity.y += GRAVITY * deltaTime;
+
         switch(this.state){
             case CharacterState.Stand:{
-                this.velocity = createVector();
+                this.velocity.x = 0;
 
                 if (!this.onGround){
                     this.state = CharacterState.Jump;
@@ -80,7 +82,6 @@ class Character extends MovingObject{
                     this.state = CharacterState.Walk;
                     break;
                 } else if(this.isPressed(KeyInput.Jump)){
-                    console.log("stand->jump");
                     this.jump();
                     break;
                 }
@@ -91,7 +92,7 @@ class Character extends MovingObject{
             case CharacterState.Walk:{
                 if(this.isPressed(KeyInput.Right) == this.isPressed(KeyInput.Left)){
                     this.state = CharacterState.Stand;
-                    this.velocity = createVector();
+                    this.velocity.x = 0;
                 } else if(this.isPressed(KeyInput.Right)){
                     if(this.pushesRightWall){
                         this.velocity.x = 0;
@@ -119,7 +120,6 @@ class Character extends MovingObject{
             }
             
             case CharacterState.Jump:{
-                this.velocity.y += GRAVITY * deltaTime;
 
                 if(this.velocity.y > 0){
                     this.velocity.y = max(this.velocity.y, MAX_FALLING_SPEED);
@@ -147,13 +147,10 @@ class Character extends MovingObject{
 
                 if(this.onGround){
                     if(this.inputs[KeyInput.Right] == this.inputs[KeyInput.Left]){
-                        console.log("jump->stand");
                         this.state = CharacterState.Stand;
-                        this.velocity = createVector();
+                        this.velocity.x = 0
                     } else {
-                        console.log("jump->walk");
                         this.state = CharacterState.Walk;
-                        this.velocity.y = 0;
                     }
                 }
 
@@ -172,7 +169,6 @@ class Character extends MovingObject{
 
     jump(){
         this.velocity.y = -this.jumpSpeed;
-        this.onPlatform = false;
         this.state = CharacterState.Jump;
     }
 
