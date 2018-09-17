@@ -5,7 +5,7 @@ const WALK_SPEED = 35;
 const JUMP_SPEED = 50;
 const CHARACTER_HEIGHT = 40;
 const CHARACTER_WIDTH = 10;
-const PLATFORM_FALL_JUMP_TIME_TOLORANCE = 0.15;
+const PLATFORM_FALL_JUMP_TIME_TOLORANCE = 0.1;
 
 const KeyInput = {
     Left : 0,

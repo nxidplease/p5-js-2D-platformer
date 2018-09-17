@@ -63,26 +63,23 @@ class MovingObject{
 
     tilesCollision(collisionX, collisionBottom, collisionTop, originalVelocity){
         let projectedVel = originalVelocity.copy();
-        for(let i = 0; i < tileMap.tileRows && !collisionX && !collisionBottom && !collisionTop; i++){
-            for(let j = 0; j < tileMap.tileCols && !collisionX && !collisionBottom && !collisionTop; j++){
-                let currTile = tileMap.tiles[i][j];
-                if(currTile.tileType == TileType.Blocked){
-                    projectedVel = this.resolvePenetration(projectedVel, currTile);
 
-                    collisionTop = (projectedVel.y > originalVelocity.y) && (originalVelocity.y < 0);
-                    collisionBottom = (projectedVel.y < originalVelocity.y) && (originalVelocity.y > 0);
-                    collisionX = Math.abs(projectedVel.x - originalVelocity.x) > 0.01;
-
-                    if(collisionBottom){
-                        this.onPlatform = true;
-                    }
-
-                    currTile.colided = (collisionBottom || collisionTop || collisionX);
-
-                    if(collisionX && collisionTop && projectedVel.y < 0){
-                        this.velocity.y = projectedVel.y = 0;
-                    }
-                }
+        for(let i = 0; i < tileMap.blockedTiles.length  && !collisionX && !collisionBottom && !collisionTop; i++){
+            let currTile = tileMap.blockedTiles[i];
+            projectedVel = this.resolvePenetration(projectedVel, currTile);
+    
+            collisionTop = (projectedVel.y > originalVelocity.y) && (originalVelocity.y < 0);
+            collisionBottom = (projectedVel.y < originalVelocity.y) && (originalVelocity.y > 0);
+            collisionX = Math.abs(projectedVel.x - originalVelocity.x) > 0.01;
+    
+            if(collisionBottom){
+                this.onPlatform = true;
+            }
+    
+            currTile.colided = (collisionBottom || collisionTop || collisionX);
+    
+            if(collisionX && collisionTop && projectedVel.y < 0){
+                this.velocity.y = projectedVel.y = 0;
             }
         }
 

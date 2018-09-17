@@ -19,20 +19,25 @@ function initColorToTileType(){
 
 class TileMap {
     constructor(img){
-        this.tileRows = Math.round(height / TILE_SIZE);
-        this.tileCols = Math.round(width / TILE_SIZE);
+        this.tileRows = img.height;
+        this.tileCols = img.width;
         this.imageToTiles(img);
     }
 
     imageToTiles(img){
-        this.tiles = [];
+        this.tiles = new Array(this.tileRows);
+        this.blockedTiles = [];
 
         for(let i = 0; i < this.tileRows; i++){
-            this.tiles[i] = [];
+            this.tiles[i] = new Array(this.tileCols);
             for(let j = 0; j < this.tileCols; j++){
                 let clrStr = color(img.get(j, i)).toString();
                 let tileType = colorToTileType.get(clrStr);
-                this.tiles[i][j] = Tile.createTile(j, i, tileType);
+                let newTile = Tile.createTile(j, i, tileType);
+                this.tiles[i][j] = newTile;
+                if(tileType == TileType.Blocked){
+                    this.blockedTiles.push(newTile);
+                }
             }
         }
     }
