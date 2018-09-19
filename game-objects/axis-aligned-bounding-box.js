@@ -41,4 +41,13 @@ class AxisAlignedBoundingBox {
     set center(newCenter){
         this._center = newCenter;
     }
+
+    draw(fillColor){
+        fill(fillColor);
+        rectMode(CENTER);
+        let bbCenter = this.center;
+        let bbHalfSize = this.halfSize;
+
+        rect(Math.round(bbCenter.x), Math.round(bbCenter.y), bbHalfSize.x * 2, bbHalfSize.y * 2);
+    }
 }

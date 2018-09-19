@@ -5,8 +5,9 @@ class MovingObject{
     constructor(pos, velocity, size){
         this.oldPosition = this.position = pos;
         this.oldVelocity = this.velocity = velocity;
+        let halfSize = size.div(2);
 
-        this.boundingBox = new AxisAlignedBoundingBox(pos, size.div(2));
+        this.boundingBox = new AxisAlignedBoundingBox(pos.copy(), halfSize);
         this.boundingBoxOffset = createVector();
         this.collisionPoints = new CollisonPoints(this.boundingBox);
 
@@ -15,6 +16,8 @@ class MovingObject{
 
         this.wasOnGround = this.onGround = (this.position.y + this.boundingBox.halfSize.y * 2) >= height;
         this.wasAtCieling = this.atCieling = (this.position.y - this.boundingBox.halfSize.y * 2) <= 0;
+        this.prevBb = new AxisAlignedBoundingBox(pos.copy(), halfSize.copy());
+        this.color = color(175, 0, 0);
     }
 
     copy() {
@@ -48,6 +51,12 @@ class MovingObject{
 
         this.boundingBox.center = p5.Vector.add(this.position,this.boundingBoxOffset);
         this.collisionPoints.recalculate(this.boundingBox);
+        this.updatePrevBoundingBox();
+    }
+
+    updatePrevBoundingBox(){
+        this.prevBb.center.set(this.boundingBox.center);
+        this.prevBb.halfSize.set(this.boundingBox.halfSize);
     }
 
     collisionDetection(originalVelocity){
@@ -163,11 +172,14 @@ class MovingObject{
 
     draw(){
         push();
-        rectMode(CENTER);
-        let bbCenter = this.boundingBox.center;
-        let bbHalfSize = this.boundingBox.halfSize;
-        fill(175, 0, 0);
-        rect(bbCenter.x, bbCenter.y, bbHalfSize.x * 2, bbHalfSize.y * 2);
+        this.boundingBox.draw(this.color);
+        pop();
+    }
+
+    clearPrev(bgColor){
+        push();
+        stroke(bgColor);
+        this.prevBb.draw(bgColor);
         pop();
     }
 }

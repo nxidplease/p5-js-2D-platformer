@@ -9,6 +9,9 @@ let tileMapImage;
 let tileMap;
 let lastUpdateTime = 0;
 let accumulator = 0;
+let staticImageBuffer;
+let backgroundColor;
+let drawCtx;
 
 
 function preload(){
@@ -16,14 +19,23 @@ function preload(){
 }
 
 function setup() {
+  ZERO_VECTOR = createVector();
+  Object.freeze(ZERO_VECTOR);
+  backgroundColor = color(175);
   initColorToTileType();
-  createCanvas(windowWidth, windowHeight);
+  drawCtx = createCanvas(windowWidth, windowHeight).drawingContext;
+  console.log(canvas);
   tileMap = new TileMap(tileMapImage);
   initKeyMap();
   character = new Character(createVector());
   lastUpdateTime = millis();
   camera = new Camera();
   screenCenter = createVector(width /2, height /2);
+
+  staticImageBuffer = createGraphics(windowWidth, windowHeight);
+  staticImageBuffer.background(backgroundColor);
+  tileMap.drawToBuffer(staticImageBuffer);
+  background(175);
 }
 
 function mousePressed(){
@@ -32,11 +44,12 @@ function mousePressed(){
 }
 
 function draw() {
-  background(175);
-  translate(camera.position.x, camera.position.y);
-  tileMap.draw()
-  character.draw();
+  camera.translate();
+  character.clearPrev(backgroundColor);
   physics(getkeyInputs());
+  camera.translateFromOrigin();
+  image(staticImageBuffer, 0, 0);
+  character.draw(backgroundColor);
 }
 
 function physics(keyInpts){
@@ -48,17 +61,28 @@ function physics(keyInpts){
   
   accumulator += frameTime;
   let prevState;
+  let prevCamera;
   
   while(accumulator >= dt){
     prevState = character.copy();
+    if(prevCamera){
+      camera.copyTo(prevCamera);
+    } else {
+      prevCamera = camera.copy();
+    }
     character.timeStep(keyInpts, dt);
     camera.arriveAt(p5.Vector.sub(screenCenter, character.position));
     camera.update(dt);
     accumulator -= dt;
   }
   
+  let alpha = accumulator / dt;
+  
   if(prevState){
-    let alpha = accumulator / dt;
     character.interpolate(prevState, alpha);
+  }
+
+  if(prevCamera){
+    camera.interpolate(prevCamera, alpha);
   }
 }

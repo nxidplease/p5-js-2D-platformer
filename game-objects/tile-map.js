@@ -62,4 +62,21 @@ class TileMap {
 
         pop();
     }
+
+    drawToBuffer(buffer){
+        buffer.push();
+        buffer.stroke(color('lime'))
+        for(let i = 0; i < this.tileRows; i++){
+            for(let j = 0; j < this.tileCols; j++){
+                if(this.tiles[i][j].tileType == TileType.Blocked){
+                    let x = j * TILE_SIZE;
+                    let y = i * TILE_SIZE;
+                    buffer.fill(0);
+                    buffer.rect(x, y, TILE_SIZE, TILE_SIZE);
+                }
+            }
+        }
+
+        buffer.pop();
+    }
 }

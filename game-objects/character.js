@@ -1,5 +1,5 @@
-const GRAVITY = 7.5;
-const MAX_FALLING_SPEED = 5;
+const GRAVITY = 0.09;
+const MAX_FALLING_SPEED = 70;
 const MIN_JUMP_SPEED = 35;
 const WALK_SPEED = 35;
 const JUMP_SPEED = 50;
@@ -37,17 +37,19 @@ class Character extends MovingObject{
     }
 
     copy() {
-        let cpy = new Character(this.position, this.velocity);
+        let cpy = new Character(this.position.copy(), this.velocity.copy());
         cpy.state = this.state;
         cpy.inputs = this.inputs.slice();
         cpy.prevInputs = this.prevInputs.slice();
-
+        return cpy;
     }
 
     interpolate(other, alpha){
        this.position.lerp(other.position, alpha);
        this.velocity.lerp(other.velocity, alpha);
        this.boundingBoxOffset.lerp(other.boundingBoxOffset, alpha);
+       this.boundingBox.center = p5.Vector.add(this.position, this.boundingBoxOffset);
+       this.updatePrevBoundingBox();
     }
 
     released(key){
@@ -68,7 +70,7 @@ class Character extends MovingObject{
     }
 
     update(deltaTime) {
-        this.velocity.y += GRAVITY * deltaTime;
+        this.velocity.y += GRAVITY;
 
         switch(this.state){
             case CharacterState.Stand:{
@@ -130,7 +132,7 @@ class Character extends MovingObject{
                 }
 
                 if(this.velocity.y > 0){
-                    this.velocity.y = max(this.velocity.y, MAX_FALLING_SPEED);
+                    this.velocity.y = min(this.velocity.y, MAX_FALLING_SPEED);
                 }
 
                 if(this.isPressed(KeyInput.Right) == this.isPressed(KeyInput.Left)){
